@@ -36,7 +36,7 @@ def compressDim(data, dim, dataShape, sparseDims, compressedData):
 
 
                     # spawn another call
-                    compressedData = list(compressDim(data[x], dim-1, dataShape,  sparseDims, compressedData))
+                    compressedData = compressDim(data[x], dim-1, dataShape,  sparseDims, compressedData)
 
                 idx_base += 1
 
@@ -46,7 +46,7 @@ def compressDim(data, dim, dataShape, sparseDims, compressedData):
             # Simply add every dimension
             for x in range(dataShape[dim]):
                 # spawn another call
-                compressedData = list(compressDim(data[x], dim-1, dataShape, sparseDims, compressedData))
+                compressedData = compressDim(data[x], dim-1, dataShape, sparseDims, compressedData)
 
         return compressedData
 

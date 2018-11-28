@@ -4,3 +4,8 @@ To give an example from [1], The Amazon Reviews tensor would need 107 exabytes o
 Hence, it is extremely important to develop better sparse representations of the data. In this repository, I will add useful compression-decompression functions for tensors.
 
 - generateCSF.py : This gives a simple and efficient recursive implementation of the CSF [2] compression technique on sparse tensors. You can input a tensor of any dimensionality and can choose to have any of the dimensions as sparse/dense.
+
+
+
+[1] Kjolstad, Fredrik, et al. "The tensor algebra compiler." Proceedings of the ACM on Programming Languages 1.OOPSLA (2017): 77.
+[2] Shaden Smith and George Karypis. 2015. Tensor-matrix products with a compressed sparse tensor. In Proceedings of the 5th Workshop on Irregular Applications: Architectures and Algorithms. ACM, 
