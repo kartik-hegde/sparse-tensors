@@ -34,7 +34,6 @@ def compressDim(data, dim, dataShape, sparseDims, compressedData):
                     compressedData[dim][1].append(idx_base)
                     nnz_count += 1
 
-
                     # spawn another call
                     compressedData = compressDim(data[x], dim-1, dataShape,  sparseDims, compressedData)
 
@@ -62,14 +61,20 @@ def compressDim(data, dim, dataShape, sparseDims, compressedData):
                 if(np.any(data[x])):
                     compressedData[dim][1].append(idx_base)
                     nnz_count += 1
+                    compressedData[-1].append(data[x])
 
                 idx_base += 1
 
             compressedData[dim][0].append(compressedData[dim][0][-1] + nnz_count)
 
+        else:
+            # Append the entire data
+            for x in range(dataShape[dim]):
+                compressedData[-1].append(data[x])
+
         return compressedData
 
-def generateCSF(data, sparseDims):
+def generateCSF(data, sparseDims, datatype=np.float32):
 
     """
         This function generates CSF data for a given uncompressed input.
@@ -77,14 +82,17 @@ def generateCSF(data, sparseDims):
         Input:
             data - Standard Numpy array
             sparseDims - A list of length number of dimensions with a bool to represent sparse dimensions.
+
+        Output:
+            Dictionary that contains two keys:
+                data: A numpy array of data
+                metadata: A list of numpy arrays, where each array has two sub-arrays for pos and idx.
     """
 
     # Create useful parameters.
     numDims = len(sparseDims)
     dataShape = data.shape[::-1]
-
-
-    print("Data shape :", dataShape)
+    sparseDims = sparseDims[::-1]
 
     # Placeholder for output
     compressedData = []
@@ -95,27 +103,44 @@ def generateCSF(data, sparseDims):
         else:
             compressedData.append([[dataShape[dim]],[]])
 
+    # Placeholder for the data
+    compressedData.append([])
+
     # Now call the recursive function
     compressedData = compressDim(data, numDims-1, dataShape, sparseDims, compressedData)
 
-    return compressedData
+    # Convert  list  to Numpy arrays
+    finalCompressedData = {'data':None, 'metadata':[]}
+
+    for idx,data in enumerate(reversed(compressedData)):
+        if(idx==0):
+            finalCompressedData['data'] = np.asarray(data, dtype=datatype)
+        else:
+            finalCompressedData['metadata'].append([np.asarray(data[0], dtype=np.int32),
+                                                    np.asarray(data[1], dtype=np.int32)])
+
+    return finalCompressedData
 
 
 if __name__ == '__main__':
 
     # Reproduce TACO paper example
 
-    data = np.array([[6,0,9,8],[0,0,0,0],[5,0,0,7]])
+    data = np.array([[6,0,9,8],[0,0,0,0],[5,0,0,7]], dtype=np.float32)
 
     # Sparse Sparse case
+    print("\n\n \t Sparse, Sparse")
     print(generateCSF(data, [True, True]))
 
     # Dense Dense case
+    print("\n\n \t Dense, Dense")
     print(generateCSF(data, [False, False]))
 
     # Sparse Dense case
+    print("\n\n \t Sparse, Dense")
     print(generateCSF(data, [True, False]))
 
     # Dense Sparse case
+    print("\n\n \t Dense, Sparse")
     print(generateCSF(data, [False, True]))
 
